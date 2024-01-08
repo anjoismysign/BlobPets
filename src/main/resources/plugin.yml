@@ -1,0 +1,19 @@
+name: BlobPets
+version: ${project.version}
+main: me.anjoismysign.blobpets.BlobPets
+api-version: 1.20
+depend:
+  - BlobLib
+authors: [ anjoismysign ]
+commands:
+  blobpets:
+    aliases: [ bp ]
+    description: Main command for BlobPets
+  petmeasurements:
+    description: Manages PetMeasurements
+  petanimations:
+    description: Manages PetAnimations
+  petdata:
+    description: Manages PetData
+  blobpet:
+    description: Manages BlobPet

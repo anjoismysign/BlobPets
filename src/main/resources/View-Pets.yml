@@ -1,0 +1,30 @@
+Title: '&lMY PETS'
+Size: 18
+Buttons:
+  Background:
+    ItemStack:
+      Material: BLACK_STAINED_GLASS_PANE
+      CustomModelData: 0
+      DisplayName: ' '
+      Lore: [ ]
+    Slot: 9-17
+  Pets:
+    ItemStack:
+      Material: AIR
+    Slot: 0-8
+  Previous-Page:
+    ItemStack:
+      Material: ARROW
+      CustomModelData: 0
+      DisplayName: '&6Previous page'
+      Lore:
+        - '&7Click to go to the previous page'
+    Slot: 16
+  Next-Page:
+    ItemStack:
+      Material: ARROW
+      CustomModelData: 0
+      DisplayName: '&6Next page'
+      Lore:
+        - '&7Click to go to the next page'
+    Slot: 17

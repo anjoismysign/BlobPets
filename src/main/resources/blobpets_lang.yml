@@ -1,0 +1,13 @@
+BlobPetsCmd:
+  TycoonModel-Get-Usage:
+    Type: CHAT
+    Message: '&cUsage: "/%o% get <key> <amount>"'
+BlobPets:
+  Pet-Spawned:
+    Type: TITLE
+    Title: '&a&lGO!'
+    Subtitle: '&7You spawned your pet'
+  Pet-Despawned:
+    Type: TITLE
+    Title: '&a&lRETURN'
+    Subtitle: '&7You returned your pet'

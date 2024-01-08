@@ -1,0 +1,17 @@
+Database:
+  #SQLITE, MYSQL, MONGODB (you may add URI, example below)
+  #URI: mongodb://localhost:27017
+  Type: SQLITE
+  IdentifierType: UUID
+  Hostname: localhost
+  Port: 3306
+  Database: database
+  Username: admin
+  Password: password
+Settings:
+  #If true, it will help debugging loading assets and such
+  Tiny-Debug: false
+Listeners:
+  TinyListeners:
+    AttributePets: true
+    DisplayLevel: false

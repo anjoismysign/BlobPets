@@ -1,0 +1,9 @@
+BlobPets:
+  Despawn-Pet:
+    Block:
+      - ' '
+      - '&fClick to return'
+  Spawn-Pet:
+    Block:
+      - ' '
+      - '&fClick to select'
