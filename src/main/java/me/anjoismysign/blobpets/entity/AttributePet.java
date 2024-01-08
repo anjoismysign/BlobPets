@@ -88,10 +88,14 @@ public record AttributePet(@NotNull String getBlobPetKey,
                                     "AttributePet " + getKey() + ". Skipping.");
                     return;
                 }
-                try {
-                    attributeInstance.addModifier(attributeModifier);
-                } catch (IllegalArgumentException ignored) {
-                }
+                AttributeModifier old = attributeInstance.getModifiers()
+                        .stream()
+                        .filter(modifier -> modifier.getUniqueId().equals(attributeModifier.getUniqueId()))
+                        .filter(modifier -> modifier.getName().equals(attributeModifier.getName()))
+                        .findFirst().orElse(null);
+                if (old != null)
+                    attributeInstance.removeModifier(old);
+                attributeInstance.addModifier(attributeModifier);
             });
         });
     }

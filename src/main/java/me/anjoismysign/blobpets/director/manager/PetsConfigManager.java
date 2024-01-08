@@ -9,6 +9,7 @@ import us.mytheria.bloblib.entities.TinyEventListener;
 
 public class PetsConfigManager extends PetsManager {
     private boolean tinyDebug;
+    private int applyDelay;
     private TinyEventListener attributePets;
     private TinyEventListener displayLevel;
 
@@ -23,6 +24,7 @@ public class PetsConfigManager extends PetsManager {
         ConfigDecorator configDecorator = getPlugin().getConfigDecorator();
         ConfigurationSection settingsSection = configDecorator.reloadAndGetSection("Settings");
         tinyDebug = settingsSection.getBoolean("Tiny-Debug");
+        applyDelay = settingsSection.getInt("Apply-Delay");
         ListenersSection listenersSection = configDecorator.reloadAndGetListeners();
         attributePets = listenersSection.tinyEventListener("AttributePets");
         displayLevel = listenersSection.tinyEventListener("DisplayLevel");
@@ -30,6 +32,10 @@ public class PetsConfigManager extends PetsManager {
 
     public boolean tinyDebug() {
         return tinyDebug;
+    }
+
+    public int getApplyDelay() {
+        return applyDelay;
     }
 
     public TinyEventListener getAttributePets() {

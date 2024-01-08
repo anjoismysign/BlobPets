@@ -1,5 +1,6 @@
 package me.anjoismysign.blobpets.entity.floatingpet;
 
+import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.AttributePet;
 import me.anjoismysign.blobpets.event.BlobFloatingPetDestroyEvent;
 import me.anjoismysign.blobpets.event.BlobFloatingPetSpawnEvent;
@@ -33,8 +34,14 @@ public class BlobItemPet extends ItemDisplayFloatingPet implements BlobFloatingP
         super.spawn();
         BlobLibPetAPI.getInstance()
                 .setPetType(entity, key);
-        BlobFloatingPetSpawnEvent event = new BlobFloatingPetSpawnEvent(this);
-        Bukkit.getPluginManager().callEvent(event);
+        Player player = findOwnerOrFail();
+        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("BlobPets"),
+                () -> {
+                    if (!player.isValid() || !player.isOnline())
+                        return;
+                    BlobFloatingPetSpawnEvent event = new BlobFloatingPetSpawnEvent(this);
+                    Bukkit.getPluginManager().callEvent(event);
+                }, BlobPetsAPI.getInstance().getApplyDelay());
     }
 
     @Override

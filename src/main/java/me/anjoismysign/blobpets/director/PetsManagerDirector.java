@@ -63,13 +63,14 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
                 getPetDataDirector().whenObjectManagerFilesLoad(c -> {
                     getBlobPetDirector().reload();
                     getBlobPetDirector().whenObjectManagerFilesLoad(d -> {
-                        AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(Collections.unmodifiableCollection(d.values()));
-                        Bukkit.getPluginManager().callEvent(event);
-                        getAttributePetDirector().reload();
-                        Bukkit.getScheduler().runTaskLater(getPlugin(), () ->
-                                        getBlobPetOwnerManager().getAll()
-                                                .forEach(BlobPetOwner::reloadHeldPet),
-                                3L);
+                        Bukkit.getScheduler().runTask(getPlugin(), () -> {
+                            getBlobPetOwnerManager().getAll()
+                                    .forEach(BlobPetOwner::reloadHeldPet);
+                            Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                                AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(Collections.unmodifiableCollection(d.values()));
+                                Bukkit.getPluginManager().callEvent(event);
+                            });
+                        });
                     });
                 });
             });

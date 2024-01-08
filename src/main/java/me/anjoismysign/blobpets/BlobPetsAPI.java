@@ -90,4 +90,13 @@ public class BlobPetsAPI {
     public boolean displayLevels() {
         return director.getConfigManager().getDisplayLevel().register();
     }
+
+    /**
+     * Gets the apply delay
+     *
+     * @return the apply delay
+     */
+    public int getApplyDelay() {
+        return director.getConfigManager().getApplyDelay();
+    }
 }

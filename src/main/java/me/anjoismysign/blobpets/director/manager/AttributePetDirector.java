@@ -2,6 +2,8 @@ package me.anjoismysign.blobpets.director.manager;
 
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
 import me.anjoismysign.blobpets.entity.AttributePet;
+import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;
+import org.bukkit.event.EventHandler;
 import org.jetbrains.annotations.Nullable;
 import us.mytheria.bloblib.entities.ObjectDirector;
 import us.mytheria.bloblib.entities.ObjectDirectorData;
@@ -23,6 +25,11 @@ public class AttributePetDirector extends ObjectDirector<AttributePet> {
             linked.put(key, attributePet);
             return attributePet;
         }, false);
+    }
+    
+    @EventHandler
+    public void onReload(AsyncBlobPetsLoadEvent event) {
+        reload();
     }
 
     @Override

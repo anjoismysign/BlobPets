@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.anjoismysign</groupId>
-    <artifactId>BlobPets</artifactId>
-    <version>1.0</version>
+    <artifactId>blobpets</artifactId>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>BlobPets</name>
@@ -49,7 +49,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputFile>${testServer}/plugins/${project.artifactId}-${project.version}.jar
+                            <outputFile>${testServer}/plugins/${project.name}-${project.version}.jar
                             </outputFile>
                             <filters>
                                 <filter>
@@ -100,4 +100,17 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub anjoismysign Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/anjoismysign/BlobPets</url>
+        </repository>
+    </distributionManagement>
+    <scm>
+        <connection>scm:git:${project.scm.url}</connection>
+        <developerConnection>scm:git:${project.scm.url}</developerConnection>
+        <url>git@github.com:idhub-io/idhub-api.git</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>
