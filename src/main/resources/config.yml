@@ -15,5 +15,4 @@ Settings:
   Apply-Delay: 20
 Listeners:
   TinyListeners:
-    AttributePets: true
     DisplayLevel: false

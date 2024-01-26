@@ -2,6 +2,7 @@ package me.anjoismysign.blobpets.entity;
 
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
+import me.anjoismysign.blobpets.entity.petexpansion.PetExpansion;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
@@ -11,15 +12,14 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import us.mytheria.bloblib.entities.BlobObject;
 import us.mytheria.bloblib.exception.ConfigurationFieldException;
 
 import java.io.File;
 import java.util.*;
 
-public record AttributePet(@NotNull String getBlobPetKey,
-                           @NotNull Map<Attribute, List<AttributeModifier>> getAttributeModifiers,
-                           @NotNull String getKey) implements BlobObject {
+public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getAttributeModifiers,
+                           @NotNull String getBlobPetKey,
+                           @NotNull String getKey) implements PetExpansion {
 
     public static AttributePet fromFile(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -55,13 +55,7 @@ public record AttributePet(@NotNull String getBlobPetKey,
                 throw new ConfigurationFieldException("Attribute '" + attributeName + "' has an invalid Operation");
             }
         });
-        return new AttributePet(blobPetKey, attributeModifiers, key);
-    }
-
-    @NotNull
-    public BlobPet getBlobPet() {
-        return Objects.requireNonNull(BlobPetsAPI.getInstance()
-                .getBlobPet(getBlobPetKey));
+        return new AttributePet(attributeModifiers, blobPetKey, key);
     }
 
     @Override

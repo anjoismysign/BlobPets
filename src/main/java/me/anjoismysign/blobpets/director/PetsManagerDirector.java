@@ -2,14 +2,11 @@ package me.anjoismysign.blobpets.director;
 
 import me.anjoismysign.blobpets.BlobPets;
 import me.anjoismysign.blobpets.command.BlobPetsCmd;
-import me.anjoismysign.blobpets.director.manager.AttributePetDirector;
 import me.anjoismysign.blobpets.director.manager.BlobPetOwnerManager;
 import me.anjoismysign.blobpets.director.manager.PetsConfigManager;
 import me.anjoismysign.blobpets.director.manager.PetsListenerManager;
-import me.anjoismysign.blobpets.entity.BlobPet;
-import me.anjoismysign.blobpets.entity.PetAnimations;
-import me.anjoismysign.blobpets.entity.PetData;
-import me.anjoismysign.blobpets.entity.PetMeasurements;
+import me.anjoismysign.blobpets.entity.*;
+import me.anjoismysign.blobpets.entity.petexpansion.PetExpansionDirector;
 import me.anjoismysign.blobpets.entity.petowner.BlobPetOwner;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;
 import org.bukkit.Bukkit;
@@ -40,7 +37,9 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
                         AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(Collections.unmodifiableCollection(d.values()));
                         Bukkit.getPluginManager().callEvent(event);
                         addManager("AttributePetDirector",
-                                new AttributePetDirector(this));
+                                PetExpansionDirector.of(this,
+                                        "AttributePet",
+                                        AttributePet::fromFile));
                     });
                 });
             });
@@ -98,8 +97,9 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
         return getDirector("BlobPet", BlobPet.class);
     }
 
-    public final AttributePetDirector getAttributePetDirector() {
-        return getManager("AttributePetDirector", AttributePetDirector.class);
+    @SuppressWarnings("unchecked")
+    public final PetExpansionDirector<AttributePet> getAttributePetDirector() {
+        return (PetExpansionDirector<AttributePet>) getManager("AttributePetDirector");
     }
 
     public final PetsConfigManager getConfigManager() {
