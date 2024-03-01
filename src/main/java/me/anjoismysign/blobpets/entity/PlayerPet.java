@@ -3,6 +3,7 @@ package me.anjoismysign.blobpets.entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,11 +31,11 @@ public record PlayerPet(@NotNull String key,
     }
 
     public Map<String, Object> serialize() {
-        return Map.of(
-                "Key", key,
-                "Level", level,
-                "DisplayName", displayName
-        );
+        Map<String, Object> map = new HashMap<>();
+        map.put("Key", key);
+        map.put("Level", level);
+        map.put("DisplayName", displayName);
+        return map;
     }
 
     @NotNull
