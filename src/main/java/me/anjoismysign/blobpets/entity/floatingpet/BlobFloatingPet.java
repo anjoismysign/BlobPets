@@ -2,14 +2,10 @@ package me.anjoismysign.blobpets.entity.floatingpet;
 
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.BlobPet;
-import me.anjoismysign.blobpets.entity.PlayerPet;
-import me.anjoismysign.blobpets.entity.petowner.PetOwner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public interface BlobFloatingPet {
 
@@ -19,20 +15,6 @@ public interface BlobFloatingPet {
      * @return the key
      */
     String getKey();
-
-    /**
-     * Gets the PlayerPet associated with this pet.
-     * It's expected to work as long as the BlobFloatingPet is the held pet.
-     *
-     * @return the PlayerPet
-     */
-    @NotNull
-    default PlayerPet getPlayerPet() {
-        PetOwner petOwner = BlobPetsAPI.getInstance()
-                .getPetOwner(getPetOwner());
-        Objects.requireNonNull(petOwner, "'petOwner' is null");
-        return Objects.requireNonNull(petOwner.getPet(petOwner.getHeldPetIndex()));
-    }
 
     /**
      * Gets the owner of the pet

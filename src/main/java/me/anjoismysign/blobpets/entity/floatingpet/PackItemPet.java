@@ -13,18 +13,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import us.mytheria.bloblib.api.BlobLibPetAPI;
 import us.mytheria.bloblib.displayentity.DisplayFloatingPetSettings;
-import us.mytheria.bloblib.displayentity.ItemDisplayFloatingPet;
+import us.mytheria.bloblib.displayentity.ItemDisplayPackFloatingPet;
+import us.mytheria.bloblib.displayentity.PackMaster;
 
-public class BlobItemPet extends ItemDisplayFloatingPet implements BlobFloatingPet {
+public class PackItemPet extends ItemDisplayPackFloatingPet implements BlobFloatingPet {
     private final String key;
 
-    public BlobItemPet(@NotNull Player owner,
+    public PackItemPet(@NotNull Player owner,
                        @NotNull ItemStack display,
                        @Nullable Particle particle,
                        @Nullable String customName,
                        @NotNull DisplayFloatingPetSettings settings,
-                       @NotNull String key) {
-        super(owner, display, particle, customName, settings);
+                       @NotNull String key,
+                       @NotNull PackMaster<BlobFloatingPet> packMaster,
+                       int storageIndex) {
+        super(owner, display, particle, customName, settings, packMaster, storageIndex);
         this.key = key;
         spawn();
     }
@@ -39,7 +42,8 @@ public class BlobItemPet extends ItemDisplayFloatingPet implements BlobFloatingP
                 () -> {
                     if (!player.isValid() || !player.isOnline())
                         return;
-                    BlobFloatingPetSpawnEvent event = new BlobFloatingPetSpawnEvent(this);
+                    BlobFloatingPetSpawnEvent event = new BlobFloatingPetSpawnEvent(this,
+                            packMaster.getIndex(getIndex()), getIndex());
                     Bukkit.getPluginManager().callEvent(event);
                 }, BlobPetsAPI.getInstance().getApplyDelay());
     }
@@ -48,9 +52,10 @@ public class BlobItemPet extends ItemDisplayFloatingPet implements BlobFloatingP
     public void destroy() {
         if (!Bukkit.getPluginManager().getPlugin("BlobPets")
                 .isEnabled()) {
-            AttributePet.unapply(this);
+            AttributePet.unapply(this, packMaster.getIndex(getIndex()));
         } else {
-            BlobFloatingPetDestroyEvent event = new BlobFloatingPetDestroyEvent(this);
+            BlobFloatingPetDestroyEvent event = new BlobFloatingPetDestroyEvent(this,
+                    packMaster.getIndex(getIndex()), getIndex());
             Bukkit.getPluginManager().callEvent(event);
         }
         super.destroy();

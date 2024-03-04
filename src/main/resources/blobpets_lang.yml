@@ -7,6 +7,10 @@ BlobPets:
     Type: TITLE
     Title: '&a&lGO!'
     Subtitle: '&7You spawned your pet'
+  Pack-Size-Exceeded:
+    Type: TITLE
+    Title: '&c&lTOO SIZEY!'
+    Subtitle: '&7You maxed out the pack size'
   Pet-Despawned:
     Type: TITLE
     Title: '&a&lRETURN'

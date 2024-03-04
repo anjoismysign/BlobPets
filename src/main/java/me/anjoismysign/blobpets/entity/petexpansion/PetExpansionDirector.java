@@ -22,6 +22,15 @@ import java.util.function.Function;
 public class PetExpansionDirector<T extends PetExpansion> extends ObjectDirector<T> {
     private final Map<String, T> linked;
 
+    private PetExpansionDirector(@NotNull ManagerDirector managerDirector,
+                                 @NotNull String objectName,
+                                 @NotNull Function<File, T> readFunction,
+                                 @NotNull Map<String, T> linked) {
+        super(managerDirector, ObjectDirectorData.simple(managerDirector
+                .getRealFileManager(), objectName), readFunction, false);
+        this.linked = linked;
+    }
+
     public static <T extends PetExpansion> PetExpansionDirector<T> of(@NotNull ManagerDirector managerDirector,
                                                                       @NotNull String objectName,
                                                                       @NotNull Function<File, T> readFunction) {
@@ -40,15 +49,6 @@ public class PetExpansionDirector<T extends PetExpansion> extends ObjectDirector
         return new PetExpansionDirector<>(managerDirector, objectName, function, linked);
     }
 
-    private PetExpansionDirector(@NotNull ManagerDirector managerDirector,
-                                 @NotNull String objectName,
-                                 @NotNull Function<File, T> readFunction,
-                                 @NotNull Map<String, T> linked) {
-        super(managerDirector, ObjectDirectorData.simple(managerDirector
-                .getRealFileManager(), objectName), readFunction, false);
-        this.linked = linked;
-    }
-
     @EventHandler
     public void onReload(AsyncBlobPetsLoadEvent event) {
         reload();
@@ -63,23 +63,25 @@ public class PetExpansionDirector<T extends PetExpansion> extends ObjectDirector
     @EventHandler
     public void onSpawn(BlobFloatingPetSpawnEvent event) {
         BlobFloatingPet floatingPet = event.getFloatingPet();
+        int holdIndex = event.getHoldIndex();
         String key = floatingPet.getKey();
         T pet = isLinked(key);
         if (pet == null)
             return;
         Player owner = floatingPet.getPetOwner();
-        pet.apply(owner);
+        pet.apply(owner, holdIndex);
     }
 
     @EventHandler
     public void onDestroy(BlobFloatingPetDestroyEvent event) {
         BlobFloatingPet floatingPet = event.getFloatingPet();
+        int holdIndex = event.getHoldIndex();
         String key = floatingPet.getKey();
         T pet = isLinked(key);
         if (pet == null)
             return;
         Player owner = floatingPet.getPetOwner();
-        pet.unapply(owner);
+        pet.unapply(owner, holdIndex);
     }
 
     /**

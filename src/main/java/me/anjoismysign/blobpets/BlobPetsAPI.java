@@ -3,6 +3,7 @@ package me.anjoismysign.blobpets;
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
 import me.anjoismysign.blobpets.entity.*;
 import me.anjoismysign.blobpets.entity.petowner.PetOwner;
+import me.anjoismysign.blobpets.settings.PetPacking;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +14,10 @@ public class BlobPetsAPI {
     private static BlobPetsAPI instance;
     private final PetsManagerDirector director;
 
+    private BlobPetsAPI(PetsManagerDirector director) {
+        this.director = director;
+    }
+
     protected static BlobPetsAPI getInstance(PetsManagerDirector director) {
         if (instance == null)
             instance = new BlobPetsAPI(director);
@@ -21,10 +26,6 @@ public class BlobPetsAPI {
 
     public static BlobPetsAPI getInstance() {
         return instance;
-    }
-
-    private BlobPetsAPI(PetsManagerDirector director) {
-        this.director = director;
     }
 
     @Nullable
@@ -80,6 +81,11 @@ public class BlobPetsAPI {
     public AttributePet isLinkedToAttributePet(@NotNull String key) {
         Objects.requireNonNull(key, "'key' cannot be null.");
         return director.getAttributePetDirector().isLinked(key);
+    }
+
+    @NotNull
+    public PetPacking getPetPacking() {
+        return director.getConfigManager().getPetPacking();
     }
 
     /**

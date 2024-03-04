@@ -13,6 +13,14 @@ Settings:
   Tiny-Debug: false
   #How long in ticks it will take for the pet to apply stats once spawned
   Apply-Delay: 20
+  Pet-Packing:
+    Distance: 0.125
+    Row-Size: 5
+    Default-Size: 3
+    Pivot:
+      Forward: -1.0
+      Up: 0.0
+      Right: -1.0
 Listeners:
   TinyListeners:
     DisplayLevel: false

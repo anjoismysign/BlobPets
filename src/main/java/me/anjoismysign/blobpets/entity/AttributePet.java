@@ -37,25 +37,34 @@ public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getA
             ConfigurationSection attributeSection = attributesSection.getConfigurationSection(attributeName);
             try {
                 Attribute attribute = Attribute.valueOf(attributeName);
-                if (!attributeSection.isString("Name"))
-                    throw new ConfigurationFieldException("Attribute '" + attributeName + "' is missing 'Name' field");
-                if (!attributeSection.isString("UUID"))
-                    throw new ConfigurationFieldException("Attribute '" + attributeName + "' is missing 'UUID' field");
                 if (!attributeSection.isDouble("Amount"))
                     throw new ConfigurationFieldException("Attribute '" + attributeName + "' has an invalid amount (DECIMAL NUMBER)");
-                String name = attributeSection.getString("Name");
-                UUID uuid = UUID.fromString(attributeSection.getString("UUID"));
                 double amount = attributeSection.getDouble("Amount");
                 if (!attributeSection.isString("Operation"))
                     throw new ConfigurationFieldException("Attribute '" + attributeName + "' is missing 'Operation' field");
                 AttributeModifier.Operation operation = AttributeModifier.Operation.valueOf(attributeSection.getString("Operation"));
                 attributeModifiers.computeIfAbsent(attribute, k -> new ArrayList<>())
-                        .add(new AttributeModifier(uuid, name, amount, operation));
+                        .add(new AttributeModifier("", amount, operation));
             } catch (IllegalArgumentException e) {
                 throw new ConfigurationFieldException("Attribute '" + attributeName + "' has an invalid Operation");
             }
         });
         return new AttributePet(attributeModifiers, blobPetKey, key);
+    }
+
+    /**
+     * Will unapply the AttributePet from the owner
+     *
+     * @param floatingPet the pet
+     */
+    public static void unapply(@NotNull BlobFloatingPet floatingPet, int holdIndex) {
+        Objects.requireNonNull(floatingPet, "'floatingPet' cannot be null");
+        String key = floatingPet.getKey();
+        AttributePet pet = BlobPetsAPI.getInstance().isLinkedToAttributePet(key);
+        if (pet == null)
+            return;
+        Player owner = floatingPet.getPetOwner();
+        pet.unapply(owner, holdIndex);
     }
 
     @Override
@@ -71,7 +80,7 @@ public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getA
         return file;
     }
 
-    public void apply(@NotNull Player player) {
+    public void apply(@NotNull Player player, int holdIndex) {
         Objects.requireNonNull(player, "'player' cannot be null");
         getAttributeModifiers.forEach((attribute, list) -> {
             list.forEach(attributeModifier -> {
@@ -84,17 +93,20 @@ public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getA
                 }
                 AttributeModifier old = attributeInstance.getModifiers()
                         .stream()
-                        .filter(modifier -> modifier.getUniqueId().equals(attributeModifier.getUniqueId()))
-                        .filter(modifier -> modifier.getName().equals(attributeModifier.getName()))
+                        .filter(modifier -> modifier.getName().equals(attribute.name() + "." + holdIndex))
                         .findFirst().orElse(null);
                 if (old != null)
                     attributeInstance.removeModifier(old);
+                attributeModifier = new AttributeModifier(UUID.randomUUID(),
+                        attribute.name() + "." + holdIndex,
+                        attributeModifier.getAmount(),
+                        attributeModifier.getOperation());
                 attributeInstance.addModifier(attributeModifier);
             });
         });
     }
 
-    public void unapply(@NotNull Player player) {
+    public void unapply(@NotNull Player player, int holdIndex) {
         Objects.requireNonNull(player, "'player' cannot be null");
         getAttributeModifiers.forEach((attribute, list) -> {
             list.forEach(attributeModifier -> {
@@ -105,23 +117,11 @@ public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getA
                                     "AttributePet " + getKey() + ". Skipping.");
                     return;
                 }
-                attributeInstance.removeModifier(attributeModifier);
+                attributeInstance.getModifiers()
+                        .stream()
+                        .filter(modifier -> modifier.getName().equals(attribute.name() + "." + holdIndex))
+                        .toList().stream().findFirst().ifPresent(attributeInstance::removeModifier);
             });
         });
-    }
-
-    /**
-     * Will unapply the AttributePet from the owner
-     *
-     * @param floatingPet the pet
-     */
-    public static void unapply(@NotNull BlobFloatingPet floatingPet) {
-        Objects.requireNonNull(floatingPet, "'floatingPet' cannot be null");
-        String key = floatingPet.getKey();
-        AttributePet pet = BlobPetsAPI.getInstance().isLinkedToAttributePet(key);
-        if (pet == null)
-            return;
-        Player owner = floatingPet.getPetOwner();
-        pet.unapply(owner);
     }
 }

@@ -1,12 +1,15 @@
 package me.anjoismysign.blobpets.entity.petowner;
 
+import me.anjoismysign.anjo.entities.Tuple2;
 import me.anjoismysign.anjo.entities.Uber;
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.BlobPet;
 import me.anjoismysign.blobpets.entity.IndexedPlayerPet;
+import me.anjoismysign.blobpets.entity.PetOwnerPack;
 import me.anjoismysign.blobpets.entity.PlayerPet;
 import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
 import me.anjoismysign.blobpets.event.BlobPetDisplayEvent;
+import me.anjoismysign.blobpets.event.PetOwnerLoadEvent;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -17,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import us.mytheria.bloblib.api.BlobLibInventoryAPI;
 import us.mytheria.bloblib.api.BlobLibMessageAPI;
 import us.mytheria.bloblib.api.BlobLibTranslatableAPI;
+import us.mytheria.bloblib.displayentity.PackMaster;
 import us.mytheria.bloblib.entities.BlobCrudable;
 import us.mytheria.bloblib.entities.BlobSerializable;
 import us.mytheria.bloblib.itemstack.ItemStackModder;
@@ -25,9 +29,8 @@ import java.util.*;
 
 public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                            @NotNull List<PlayerPet> getPets,
-                           @NotNull Uber<Integer> heldPetIndexUber,
-                           @NotNull Uber<Boolean> holdingPetUber,
-                           @NotNull Uber<BlobFloatingPet> heldPetUber) implements BlobSerializable,
+                           @NotNull Uber<Integer> maxSizeUber,
+                           @NotNull Uber<PetOwnerPack> petOwnerPackUber) implements BlobSerializable,
         PetOwner {
 
     public static BlobPetOwner GENERATE(@NotNull BlobCrudable crudable) {
@@ -36,37 +39,38 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
         Map<String, Object> serializedPets = document.containsKey("Pets") ?
                 (Map<String, Object>) document.get("Pets") :
                 new HashMap<>();
+
         List<PlayerPet> pets = PetInventoryHolder.deserializePets(serializedPets);
-        int heldPetIndex = crudable.hasInteger("HeldPetIndex").orElse(0);
-        boolean holdingPet = crudable.hasBoolean("IsHoldingPet").orElse(false);
         BlobPetOwner owner = new BlobPetOwner(crudable,
                 pets,
-                new Uber<>(heldPetIndex),
-                new Uber<>(holdingPet),
+                Uber.drive(BlobPetsAPI.getInstance().getPetPacking().getDefaultSize()),
                 Uber.fly());
-        Player player = owner.getPlayer();
+        Map<String, Object> serializedPetOwnerPack = document.containsKey("PetOwnerPack") ?
+                (Map<String, Object>) document.get("PetOwnerPack") :
+                new HashMap<>();
+        Tuple2<PetOwnerPack, Map<Integer, Integer>> tuple = PetOwnerPack.deserialize(serializedPetOwnerPack, owner);
+        PetOwnerPack pack = tuple.first();
+        owner.petOwnerPackUber.talk(pack);
         Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("BlobPets"),
                 () -> {
-                    if (!player.isValid() || !player.isOnline())
+                    Player player = owner.getPlayer();
+                    if (player == null || !player.isValid() || !player.isOnline())
                         return;
-                    BlobFloatingPet heldPet;
-                    if (holdingPet) {
-                        PlayerPet pet = pets.get(heldPetIndex);
-                        BlobPet blobPet = pet.getBlobPet();
-                        if (blobPet.isBlobBlockPet())
-                            heldPet = blobPet.asBlockDisplay(player);
-                        else
-                            heldPet = blobPet.asItemDisplay(player);
-                        owner.heldPetUber.talk(heldPet);
-                    } else {
-                        heldPet = null;
-                    }
+                    Map<Integer, Integer> indexes = tuple.second();
+                    List<Integer> holdIndexes = indexes.keySet().stream()
+                            .sorted(Comparator.comparingInt(indexes::get))
+                            .toList();
+                    holdIndexes.forEach(index -> {
+                        pack.add(indexes.get(index));
+                    });
+                    PetOwnerLoadEvent loadEvent = new PetOwnerLoadEvent(owner);
+                    Bukkit.getPluginManager().callEvent(loadEvent);
                 });
         return owner;
     }
 
     @Override
-    public void openPetSelector() {
+    public void openPetMenu() {
         Player player = getPlayer();
         BlobLibInventoryAPI.getInstance().customSelector(
                 "View-Pets",
@@ -88,33 +92,24 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                 indexedPlayerPet -> {
                     if (!player.isOnline() || !player.isValid())
                         return;
-                    int index = indexedPlayerPet.getIndex();
-                    if (BlobPetOwner.this.getHeldPetIndex() == index) {
-                        if (isHoldingPet()) {
-                            getHeldPet().remove();
-                            heldPetUber.talk(null);
-                            holdingPetUber.talk(false);
-                            BlobLibMessageAPI.getInstance()
-                                    .getMessage("BlobPets.Pet-Despawned",
-                                            player)
-                                    .handle(player);
-                            player.closeInventory();
+                    int storageIndex = indexedPlayerPet.getIndex();
+                    if (BlobPetOwner.this.isHoldingPet(storageIndex)) {
+                        if (!returnHeldPet(storageIndex))
                             return;
-                        }
+                        BlobLibMessageAPI.getInstance()
+                                .getMessage("BlobPets.Pet-Despawned",
+                                        player)
+                                .handle(player);
+                        player.closeInventory();
+                        return;
                     }
-                    if (isHoldingPet()) {
-                        getHeldPet().remove();
+                    if (!holdPet(storageIndex)) {
+                        BlobLibMessageAPI.getInstance()
+                                .getMessage("BlobPets.Pack-Size-Exceeded", player)
+                                .handle(player);
+                        player.closeInventory();
+                        return;
                     }
-                    PlayerPet playerPet = indexedPlayerPet.getPlayerPet();
-                    BlobPet blobPet = playerPet.getBlobPet();
-                    BlobFloatingPet pet;
-                    if (blobPet.isBlobBlockPet())
-                        pet = blobPet.asBlockDisplay(player);
-                    else
-                        pet = blobPet.asItemDisplay(player);
-                    heldPetUber.talk(pet);
-                    heldPetIndexUber.talk(index);
-                    holdingPetUber.talk(true);
                     BlobLibMessageAPI.getInstance()
                             .getMessage("BlobPets.Pet-Spawned",
                                     player)
@@ -124,14 +119,13 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                 },
                 //displays the indexedPlayerPet
                 indexedPlayerPet -> {
-                    int index = indexedPlayerPet.getIndex();
+                    int storageIndex = indexedPlayerPet.getIndex();
                     PlayerPet playerPet = indexedPlayerPet.getPlayerPet();
                     BlobPet pet = playerPet.getBlobPet();
                     ItemStack display = pet.display(player);
                     ItemMeta itemMeta = display.getItemMeta();
                     if (itemMeta != null) {
-                        boolean isHeld = BlobPetOwner.this.getHeldPetIndex() == index
-                                && isHoldingPet();
+                        boolean isHeld = isHoldingPet(storageIndex);
                         String translatableBlockKey = isHeld ? "BlobPets.Despawn-Pet" : "BlobPets.Spawn-Pet";
                         List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : new ArrayList<>();
                         lore.addAll(BlobLibTranslatableAPI.getInstance()
@@ -150,61 +144,56 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                 });
     }
 
-    @Override
     public @Nullable Player getPlayer() {
         return BlobSerializable.super.getPlayer();
     }
 
-    @Override
-    public BlobFloatingPet getHeldPet() {
-        return heldPetUber.thanks();
+    public @NotNull Map<Integer, BlobFloatingPet> getHeldPets() {
+        return petOwnerPackUber.thanks().packMap();
     }
 
-    @Override
-    public void reloadHeldPet() {
+    public boolean returnHeldPet(int storageIndex) {
+        PetOwnerPack pack = petOwnerPackUber.thanks();
+        PackMaster<BlobFloatingPet> packMaster = pack.packMaster();
+        int holdIndex = packMaster.getIndex(storageIndex);
+        Tuple2<Integer, BlobFloatingPet> tuple = packMaster.getComponent(holdIndex);
+        if (tuple == null)
+            return false;
+        BlobFloatingPet pet = tuple.second();
+        if (pet == null)
+            return false;
+        pet.remove();
+        pack.packMaster().removeComponent(holdIndex);
+        return true;
+    }
+
+    public boolean holdPet(int storageIndex) {
+        return petOwnerPackUber.thanks().add(storageIndex);
+    }
+
+    public void reloadHeldPets() {
         if (!Bukkit.isPrimaryThread()) {
             Bukkit.getPluginManager().getPlugin("BlobPets")
                     .getLogger().severe("Attempted to reload pet on non-primary thread!");
             return;
         }
-        if (!isHoldingPet())
+        petOwnerPackUber.thanks().reload();
+    }
+
+    public void removeHeldPets() {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getPluginManager().getPlugin("BlobPets")
+                    .getLogger().severe("Attempted to remove pet on non-primary thread!");
             return;
-        BlobFloatingPet pet = getHeldPet();
-        pet.remove();
-        BlobPet blobPet = pet.getBlobPet();
-        if (blobPet.isBlobBlockPet())
-            pet = blobPet.asBlockDisplay(getPlayer());
-        else
-            pet = blobPet.asItemDisplay(getPlayer());
-        heldPetUber.talk(pet);
+        }
+        petOwnerPackUber.thanks().removeHeldPets();
     }
 
-    @Override
-    public int getHeldPetIndex() {
-        return heldPetIndexUber.thanks();
-    }
-
-    @Override
-    public boolean isHoldingPet() {
-        return holdingPetUber.thanks() && getHeldPet() != null;
-    }
-
-    @Override
-    public void storeHeldPet() {
-        if (!isHoldingPet())
-            return;
-        PlayerPet held = getPet(getHeldPetIndex());
-        if (held == null) return;
-
-    }
-
-    @Override
     public BlobCrudable serializeAllAttributes() {
         BlobCrudable crudable = blobCrudable();
         Document document = crudable.getDocument();
         document.put("Pets", serializePets());
-        document.put("HeldPetIndex", getHeldPetIndex());
-        document.put("IsHoldingPet", isHoldingPet());
+        document.put("PetOwnerPack", petOwnerPackUber.thanks().serialize());
         return crudable;
     }
 }

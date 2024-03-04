@@ -2,8 +2,9 @@ package me.anjoismysign.blobpets.entity;
 
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
-import me.anjoismysign.blobpets.entity.floatingpet.BlobBlockPet;
-import me.anjoismysign.blobpets.entity.floatingpet.BlobItemPet;
+import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
+import me.anjoismysign.blobpets.entity.floatingpet.PackBlockPet;
+import me.anjoismysign.blobpets.entity.floatingpet.PackItemPet;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import us.mytheria.bloblib.displayentity.DisplayFloatingPetSettings;
+import us.mytheria.bloblib.displayentity.PackMaster;
 import us.mytheria.bloblib.entities.BlobObject;
 import us.mytheria.bloblib.entities.translatable.TranslatableItem;
 import us.mytheria.bloblib.exception.ConfigurationFieldException;
@@ -93,7 +95,9 @@ public record BlobPet(@NotNull PetData getPetData,
      * @param owner the owner of the pet
      * @return a new instance of ItemDisplayFloatingPet
      */
-    public BlobItemPet asItemDisplay(@NotNull Player owner) {
+    public BlobFloatingPet asItemDisplay(@NotNull Player owner,
+                                         @NotNull PackMaster<BlobFloatingPet> packMaster,
+                                         int storageIndex) {
         Objects.requireNonNull(owner, "'owner' cannot be null");
         ItemStack itemStack = getPetData().getItemStack();
         Particle particle = getPetData().getParticle();
@@ -101,8 +105,8 @@ public record BlobPet(@NotNull PetData getPetData,
         DisplayFloatingPetSettings settings = toDisplayFloatingPetSettings();
         if (itemStack == null || itemStack.getType().isAir())
             throw new IllegalStateException("ItemStack cannot be null nor be air");
-        return new BlobItemPet(owner, itemStack, particle, customName,
-                settings, getKey);
+        return new PackItemPet(owner, itemStack, particle, customName,
+                settings, getKey, packMaster, storageIndex);
     }
 
     /**
@@ -111,7 +115,9 @@ public record BlobPet(@NotNull PetData getPetData,
      * @param owner the owner of the pet
      * @return a new instance of BlockDisplayFloatingPet
      */
-    public BlobBlockPet asBlockDisplay(@NotNull Player owner) {
+    public BlobFloatingPet asBlockDisplay(@NotNull Player owner,
+                                          @NotNull PackMaster<BlobFloatingPet> packMaster,
+                                          int storageIndex) {
         Objects.requireNonNull(owner, "'owner' cannot be null");
         BlockData blockData = getPetData().getBlockData();
         Particle particle = getPetData().getParticle();
@@ -119,8 +125,8 @@ public record BlobPet(@NotNull PetData getPetData,
         DisplayFloatingPetSettings settings = toDisplayFloatingPetSettings();
         if (blockData == null || blockData.getMaterial().isAir())
             throw new IllegalStateException("ItemStack cannot be null nor be air");
-        return new BlobBlockPet(owner, blockData, particle, customName,
-                settings, getKey);
+        return new PackBlockPet(owner, blockData, particle, customName,
+                settings, getKey, packMaster, storageIndex);
     }
 
     /**
@@ -135,6 +141,7 @@ public record BlobPet(@NotNull PetData getPetData,
         ItemStack itemStack = getPetData().getItemStack();
         if (itemStack == null)
             itemStack = new ItemStack(getPetData().getBlockData().getPlacementMaterial());
+        itemStack = new ItemStack(itemStack);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null)
             return itemStack;

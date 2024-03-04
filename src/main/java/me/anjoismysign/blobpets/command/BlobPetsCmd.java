@@ -17,11 +17,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class BlobPetsCmd {
-    public static BlobPetsCmd of(@NotNull PetsManagerDirector director) {
-        Objects.requireNonNull(director);
-        return new BlobPetsCmd(director);
-    }
-
     private BlobPetsCmd(PetsManagerDirector managerDirector) {
         CommandDirector director = new CommandDirector(managerDirector
                 .getPlugin(), "blobpets");
@@ -58,7 +53,7 @@ public class BlobPetsCmd {
                         .toCommandSender(player);
                 return true;
             }
-            petOwner.openPetSelector();
+            petOwner.openPetMenu();
             return true;
         });
         director.addAdminChildTabCompleter(data -> {
@@ -109,7 +104,7 @@ public class BlobPetsCmd {
                         .toCommandSender(sender);
                 return true;
             }
-            petOwner.openPetSelector();
+            petOwner.openPetMenu();
             return true;
         });
         director.addAdminChildTabCompleter(data -> {
@@ -183,5 +178,10 @@ public class BlobPetsCmd {
             petOwner.addPet(pet);
             return true;
         });
+    }
+
+    public static BlobPetsCmd of(@NotNull PetsManagerDirector director) {
+        Objects.requireNonNull(director);
+        return new BlobPetsCmd(director);
     }
 }

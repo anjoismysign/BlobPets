@@ -12,6 +12,14 @@ import java.util.Map;
 
 public interface PetInventoryHolder {
 
+    static List<PlayerPet> deserializePets(Map<String, Object> pets) {
+        List<PlayerPet> playerPets = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : pets.entrySet()) {
+            playerPets.add(PlayerPet.deserialize((Map<String, Object>) entry.getValue()));
+        }
+        return playerPets;
+    }
+
     /**
      * Gets the pets of this pet owner that are accessible in the pet inventory
      *
@@ -32,14 +40,6 @@ public interface PetInventoryHolder {
             pets.put(String.valueOf(i), pet.serialize());
         }
         return pets;
-    }
-
-    static List<PlayerPet> deserializePets(Map<String, Object> pets) {
-        List<PlayerPet> playerPets = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : pets.entrySet()) {
-            playerPets.add(PlayerPet.deserialize((Map<String, Object>) entry.getValue()));
-        }
-        return playerPets;
     }
 
     /**
@@ -88,22 +88,22 @@ public interface PetInventoryHolder {
     }
 
     /**
-     * Removes a pet from the pet inventory through its index
+     * Removes a pet from the pet inventory through its storage index
      *
-     * @param index The index of the pet to remove
+     * @param storageIndex The index of the pet to remove
      */
-    default void removePet(int index) {
-        getPets().remove(index);
+    default void removePet(int storageIndex) {
+        getPets().remove(storageIndex);
     }
 
     /**
-     * Gets a pet from the pet inventory through its index
+     * Gets a pet from the pet inventory through its storage index
      *
-     * @param index The index of the pet
+     * @param storageIndex The index of the pet
      * @return The pet
      */
     @Nullable
-    default PlayerPet getPet(int index) {
-        return getPets().get(index);
+    default PlayerPet getPet(int storageIndex) {
+        return getPets().get(storageIndex);
     }
 }

@@ -33,14 +33,15 @@ public interface PetExpansion extends BlobObject {
     /**
      * Applies the pet expansion to the player.
      *
-     * @param player The player to apply the pet expansion to.
+     * @param player    The player to apply the pet expansion to.
+     * @param holdIndex The index of the pet expansion in the pack.
      */
-    void apply(@NotNull Player player);
+    void apply(@NotNull Player player, int holdIndex);
 
     /**
      * Unapplies the pet expansion from the player.
      *
      * @param player The player to unapply the pet expansion from.
      */
-    void unapply(@NotNull Player player);
+    void unapply(@NotNull Player player, int holdIndex);
 }
