@@ -22,14 +22,14 @@ public class BlobPetsCmd {
                 .getPlugin(), "blobpets");
         /*
          * /bp give <blobpet> <player>
-         * /bp openpetselector <player>
-         * /bp openpetselector
+         * /bp managepets <player>
+         * /bp managepets
          */
         director.addNonAdminChildTabCompleter(data -> {
             String[] args = data.args();
             if (args.length != 1)
                 return null;
-            return List.of("openpetselector");
+            return List.of("managepets");
         });
         director.addNonAdminChildCommand(data -> {
             String[] args = data.args();
@@ -37,7 +37,7 @@ public class BlobPetsCmd {
             if (args.length < 1)
                 return false;
             String subCommand = args[0];
-            if (!subCommand.equalsIgnoreCase("openpetselector"))
+            if (!subCommand.equalsIgnoreCase("managepets"))
                 return false;
             if (!(sender instanceof Player player)) {
                 BlobLibMessageAPI.getInstance()
@@ -53,7 +53,7 @@ public class BlobPetsCmd {
                         .toCommandSender(player);
                 return true;
             }
-            petOwner.openPetMenu();
+            petOwner.managePets();
             return true;
         });
         director.addAdminChildTabCompleter(data -> {
@@ -61,12 +61,12 @@ public class BlobPetsCmd {
             switch (args.length) {
                 case 1 -> {
                     List<String> completions = new ArrayList<>();
-                    completions.add("openpetselector");
+                    completions.add("managepets");
                     return completions;
                 }
                 case 2 -> {
                     String subCommand = args[0];
-                    if (!subCommand.equalsIgnoreCase("openpetselector"))
+                    if (!subCommand.equalsIgnoreCase("managepets"))
                         return null;
                     List<String> completions = new ArrayList<>();
                     completions.addAll(Bukkit.getOnlinePlayers().stream()
@@ -85,9 +85,9 @@ public class BlobPetsCmd {
             if (args.length < 2)
                 return false;
             String subCommand = args[0];
-            if (!subCommand.equalsIgnoreCase("openpetselector"))
+            if (!subCommand.equalsIgnoreCase("managepets"))
                 return false;
-            // subCommand = openpetselector
+            // subCommand = managepets
             String inputPlayer = args[2];
             Player target = Bukkit.getPlayer(inputPlayer);
             if (target == null) {
@@ -104,7 +104,7 @@ public class BlobPetsCmd {
                         .toCommandSender(sender);
                 return true;
             }
-            petOwner.openPetMenu();
+            petOwner.managePets();
             return true;
         });
         director.addAdminChildTabCompleter(data -> {
@@ -175,7 +175,20 @@ public class BlobPetsCmd {
                         .toCommandSender(sender);
                 return true;
             }
-            petOwner.addPet(pet);
+            int amount = 1;
+            if (args.length > 3) {
+                try {
+                    amount = Integer.parseInt(args[3]);
+                    if (amount < 1)
+                        amount = 1;
+                } catch (NumberFormatException e) {
+                    BlobLibMessageAPI.getInstance()
+                            .getMessage("Builder.Number-Exception", sender)
+                            .toCommandSender(sender);
+                    return true;
+                }
+            }
+            petOwner.addPet(pet, amount);
             return true;
         });
     }

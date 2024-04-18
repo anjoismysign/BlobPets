@@ -6,7 +6,7 @@
 
     <groupId>me.anjoismysign</groupId>
     <artifactId>blobpets</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>BlobPets</name>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>us.mytheria</groupId>
             <artifactId>bloblib</artifactId>
-            <version>1.698.01</version>
+            <version>1.698.12</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -12,6 +12,7 @@ import us.mytheria.bloblib.entities.TinyEventListener;
 public class PetsConfigManager extends PetsManager {
     private boolean tinyDebug;
     private int applyDelay;
+    private boolean useSimpleStorage;
     private PetPacking petPacking;
     private TinyEventListener displayLevel;
 
@@ -27,6 +28,7 @@ public class PetsConfigManager extends PetsManager {
         ConfigurationSection settingsSection = configDecorator.reloadAndGetSection("Settings");
         tinyDebug = settingsSection.getBoolean("Tiny-Debug");
         applyDelay = settingsSection.getInt("Apply-Delay");
+        useSimpleStorage = settingsSection.getBoolean("Use-Simple-Storage");
         ConfigurationSection petPackingSection = settingsSection.getConfigurationSection("Pet-Packing");
         ConfigurationSection pivotSection = petPackingSection.getConfigurationSection("Pivot");
         Vector pivot = new Vector(pivotSection.getDouble("Forward"), pivotSection.getDouble("Up"), pivotSection.getDouble("Right"));
@@ -48,6 +50,10 @@ public class PetsConfigManager extends PetsManager {
 
     public int getApplyDelay() {
         return applyDelay;
+    }
+
+    public boolean useSimpleStorage() {
+        return useSimpleStorage;
     }
 
     public PetPacking getPetPacking() {

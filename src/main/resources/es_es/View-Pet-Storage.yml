@@ -1,11 +1,10 @@
 Locale: es_es
-Title: '&lMIS MASCOTAS'
+Title: '&lMIS MASCOTAS > ALMACENAMIENTO'
 Size: 18
 Buttons:
   Background:
     ItemStack:
       Material: BLACK_STAINED_GLASS_PANE
-      CustomModelData: 0
       DisplayName: ' '
       Lore: [ ]
     Slot: 9-17
@@ -16,7 +15,6 @@ Buttons:
   Previous-Page:
     ItemStack:
       Material: ARROW
-      CustomModelData: 0
       DisplayName: '&6Página anterior'
       Lore:
         - '&7Click para ir a la página anterior'
@@ -24,8 +22,12 @@ Buttons:
   Next-Page:
     ItemStack:
       Material: ARROW
-      CustomModelData: 0
       DisplayName: '&6Página siguiente'
       Lore:
         - '&7Click para ir a la siguiente página'
     Slot: 17
+  Return:
+    ItemStack:
+      Material: SPECTRAL_ARROW
+      DisplayName: '&6Regresar'
+    Slot: 9

@@ -1,10 +1,9 @@
-Title: '&lMY PETS'
+Title: '&lMY PETS > STORAGE'
 Size: 18
 Buttons:
   Background:
     ItemStack:
       Material: BLACK_STAINED_GLASS_PANE
-      CustomModelData: 0
       DisplayName: ' '
       Lore: [ ]
     Slot: 9-17
@@ -15,7 +14,6 @@ Buttons:
   Previous-Page:
     ItemStack:
       Material: ARROW
-      CustomModelData: 0
       DisplayName: '&6Previous page'
       Lore:
         - '&7Click to go to the previous page'
@@ -23,8 +21,12 @@ Buttons:
   Next-Page:
     ItemStack:
       Material: ARROW
-      CustomModelData: 0
       DisplayName: '&6Next page'
       Lore:
         - '&7Click to go to the next page'
     Slot: 17
+  Return:
+    ItemStack:
+      Material: SPECTRAL_ARROW
+      DisplayName: '&6Return'
+    Slot: 9

@@ -10,9 +10,19 @@ import java.util.Map;
 public interface PetOwner extends PetInventoryHolder {
 
     /**
+     * Opens a UI to manage pets
+     */
+    void managePets();
+
+    /**
      * Will open the pet menu
      */
-    void openPetMenu();
+    void openPetStorage();
+
+    /**
+     * Will open the pet inventory
+     */
+    void openPetInventory();
 
     /**
      * Gets the player associated with this pet owner
@@ -69,10 +79,20 @@ public interface PetOwner extends PetInventoryHolder {
      * Returns a held pet to storage by its storage index.
      * The storage index is the index of the pet in #getPets
      *
-     * @param storageIndex The realIndex of the pet
-     * @return If the pet was returned. False if no pet was held by that real index.
+     * @param storageIndex The storageIndex of the pet
+     * @return If the pet was returned. False if no pet was held by that storage index.
      */
-    boolean returnHeldPet(int storageIndex);
+    boolean returnHeldPetByStorage(int storageIndex);
+
+    /**
+     * Returns a held pet to storage by its hold index.
+     * The hold index is the order the pet was held in, not the index of #getPets.
+     * Should not be used if BlobPetsAPI#useSimpleStorage is true.
+     *
+     * @param holdIndex The index of the pet
+     * @return If the pet was returned. False if no pet was held by that hold index.
+     */
+    boolean returnHeldPet(int holdIndex);
 
     /**
      * Returns a held pet to storage
@@ -84,7 +104,7 @@ public interface PetOwner extends PetInventoryHolder {
         for (Map.Entry<Integer, BlobFloatingPet> entry : getHeldPets().entrySet()) {
             if (!entry.getValue().equals(pet))
                 continue;
-            return returnHeldPet(entry.getKey());
+            return returnHeldPetByStorage(entry.getKey());
         }
         return false;
     }

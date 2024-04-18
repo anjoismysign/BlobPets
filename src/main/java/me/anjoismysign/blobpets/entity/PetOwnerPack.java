@@ -1,6 +1,5 @@
 package me.anjoismysign.blobpets.entity;
 
-import me.anjoismysign.anjo.entities.Tuple2;
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
 import me.anjoismysign.blobpets.entity.petowner.BlobPetOwner;
@@ -8,6 +7,7 @@ import me.anjoismysign.blobpets.settings.PetPacking;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import us.mytheria.bloblib.api.BlobLibMessageAPI;
 import us.mytheria.bloblib.displayentity.PackMaster;
 
 import java.util.HashMap;
@@ -15,76 +15,66 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Represents a PetOwnerPack.
+ *
+ * @param getOwner      - the owner
+ * @param getHeldPets   - the held pets. They are added when a pet is added to the pack,
+ *                      for example when instantiating a DisplayPackFloatingPet
+ * @param getMaxSize    - the max size of the pack
+ * @param getPackMaster - the pack master
+ */
 public record PetOwnerPack(
         @NotNull BlobPetOwner getOwner,
-        @NotNull Map<Integer, BlobFloatingPet> packMap,
-        @NotNull int getMaxSize,
-        @NotNull PackMaster<BlobFloatingPet> packMaster) {
+        @NotNull Map<Integer, BlobFloatingPet> getHeldPets,
+        int getMaxSize,
+        @NotNull PackMaster<BlobFloatingPet> getPackMaster) {
 
-    public static PetOwnerPack of(@NotNull BlobPetOwner owner,
-                                  @NotNull Integer maxSize) {
-        Map<Integer, BlobFloatingPet> map = new HashMap<>();
-        BlobPetsAPI api = BlobPetsAPI.getInstance();
-        PetPacking petPacking = api.getPetPacking();
-        PackMaster<BlobFloatingPet> packMaster = PackMaster.of(petPacking.getRowSize(),
-                petPacking.getDistance(),
-                map,
-                petPacking.getPivot());
-        return new PetOwnerPack(owner, map, maxSize, packMaster);
-    }
-
-    public static Tuple2<PetOwnerPack, Map<Integer, Integer>> deserialize(@NotNull Map<String, Object> map,
-                                                                          @NotNull BlobPetOwner owner) {
+    public static PetOwnerPack deserialize(@NotNull Map<String, Object> map,
+                                           @NotNull BlobPetOwner owner) {
         Map<Integer, BlobFloatingPet> packMap = new HashMap<>();
-        Map<Integer, Integer> indexes = map.containsKey("Indexes") ? (Map<Integer, Integer>) map.get("Indexes") : new HashMap<>();
         int maxSize = map.containsKey("MaxSize") ? (int) map.get("MaxSize") : BlobPetsAPI.getInstance()
                 .getPetPacking().getDefaultSize();
         BlobPetsAPI api = BlobPetsAPI.getInstance();
         PetPacking petPacking = api.getPetPacking();
-        PackMaster<BlobFloatingPet> packMaster = PackMaster.of(petPacking.getRowSize(),
-                petPacking.getDistance(),
-                packMap,
-                petPacking.getPivot());
-        return new Tuple2<>(new PetOwnerPack(owner,
-                packMap, maxSize, packMaster), indexes);
+        PackMaster<BlobFloatingPet> packMaster = PackMaster
+                .of(petPacking.getRowSize(),
+                        petPacking.getDistance(),
+                        packMap,
+                        petPacking.getPivot());
+        return new PetOwnerPack(owner, packMap, maxSize, packMaster);
     }
 
     public void apply(@NotNull PetPacking petPacking) {
         Objects.requireNonNull(petPacking, "'petPacking' cannot be null");
-        packMaster.setPivot(petPacking.getPivot());
-        packMaster.setMaxPerRow(petPacking.getRowSize());
-        packMaster.setComponentLength(petPacking.getDistance());
+        getPackMaster.setPivot(petPacking.getPivot());
+        getPackMaster.setMaxPerRow(petPacking.getRowSize());
+        getPackMaster.setComponentLength(petPacking.getDistance());
     }
 
     public void removeHeldPets() {
-        List<BlobFloatingPet> held = packMap.values().stream().toList();
+        List<BlobFloatingPet> held = getHeldPets.values().stream().toList();
         held.forEach(BlobFloatingPet::remove);
     }
 
-    public void returnHeldPets() {
-        removeHeldPets();
-        packMap.clear();
-    }
-
     public void reload() {
-        if (packMap.isEmpty())
+        if (getHeldPets.isEmpty())
             return;
-        List<BlobFloatingPet> held = packMap.values().stream().toList();
+        List<BlobFloatingPet> held = getHeldPets.values().stream().toList();
         held.forEach(BlobFloatingPet::remove);
         Player player = getOwner.getPlayer();
         if (player == null)
             return;
-        packMap.keySet().forEach(storageIndex -> {
-            PlayerPet pet = getPet(storageIndex);
-            if (pet == null)
+        getHeldPets.keySet().forEach(index -> {
+            BlobPet blobPet = getPet(index);
+            if (blobPet == null)
                 return;
             BlobFloatingPet heldPet;
-            BlobPet blobPet = pet.getBlobPet();
             if (blobPet.isBlobBlockPet())
-                heldPet = blobPet.asBlockDisplay(player, packMaster, storageIndex);
+                heldPet = blobPet.asBlockDisplay(player, getPackMaster, index);
             else
-                heldPet = blobPet.asItemDisplay(player, packMaster, storageIndex);
-            packMap.put(storageIndex, heldPet);
+                heldPet = blobPet.asItemDisplay(player, getPackMaster, index);
+            getHeldPets.put(index, heldPet);
         });
     }
 
@@ -93,34 +83,40 @@ public record PetOwnerPack(
     }
 
     private boolean canAdd() {
-        return packMap.size() < getMaxSize();
+        return getOwner.getInventory().size() < getMaxSize();
     }
 
     @Nullable
-    private PlayerPet getPet(int storageIndex) {
-        return getOwner.getPets().get(storageIndex);
+    private BlobPet getPet(int storageIndex) {
+        return getOwner.getPet(storageIndex);
     }
 
-    public boolean add(int storageIndex) {
+    public boolean add(@NotNull String key,
+                       boolean equipInInventory) {
+        Objects.requireNonNull(key, "'key' cannot be null");
         Player player = getOwner.getPlayer();
         if (player == null)
             return false;
-        if (!canAdd())
+        if (!canAdd() && equipInInventory) {
+            BlobLibMessageAPI.getInstance()
+                    .getMessage("BlobPets.Pack-Size-Exceeded", player)
+                    .handle(player);
+            player.closeInventory();
             return false;
-        PlayerPet pet = getPet(storageIndex);
-        if (pet == null)
-            return false;
-        BlobPet blobPet = pet.getBlobPet();
+        }
+        BlobPet blobPet = getOwner.getBlobPet(key);
+        int index = getOwner.getInventory().size();
         if (blobPet.isBlobBlockPet())
-            blobPet.asBlockDisplay(player, packMaster, storageIndex);
+            blobPet.asBlockDisplay(player, getPackMaster, index);
         else
-            blobPet.asItemDisplay(player, packMaster, storageIndex);
+            blobPet.asItemDisplay(player, getPackMaster, index);
+        if (equipInInventory)
+            getOwner.equip(blobPet, index);
         return true;
     }
 
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("Indexes", packMaster.getIndexes());
         map.put("MaxSize", getMaxSize);
         return map;
     }

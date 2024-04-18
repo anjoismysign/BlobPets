@@ -1,0 +1,24 @@
+Locale: es_es
+Title: '&lMIS MASCOTAS'
+Size: 27
+Buttons:
+  Background:
+    ItemStack:
+      Material: BLACK_STAINED_GLASS_PANE
+      DisplayName: ' '
+      Lore: [ ]
+    Slot: 0-26
+  Inventory:
+    ItemStack:
+      Material: LEAD
+      DisplayName: '&6Inventario'
+      Lore:
+        - '&7Las equipadas'
+    Slot: 12
+  Storage:
+    ItemStack:
+      Material: CHEST
+      DisplayName: '&6Almacenamiento'
+      Lore:
+        - '&7Las almacenadas'
+    Slot: 14

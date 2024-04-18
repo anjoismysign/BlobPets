@@ -54,6 +54,8 @@ public class PackItemPet extends ItemDisplayPackFloatingPet implements BlobFloat
                 .isEnabled()) {
             AttributePet.unapply(this, packMaster.getIndex(getIndex()));
         } else {
+            if (findOwner() == null)
+                return;
             BlobFloatingPetDestroyEvent event = new BlobFloatingPetDestroyEvent(this,
                     packMaster.getIndex(getIndex()), getIndex());
             Bukkit.getPluginManager().callEvent(event);

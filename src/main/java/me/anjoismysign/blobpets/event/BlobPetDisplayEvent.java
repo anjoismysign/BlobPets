@@ -12,18 +12,7 @@ import java.util.Objects;
  */
 public class BlobPetDisplayEvent extends BlobPetEvent {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-
-    @Override
-    public HandlerList getHandlers() {
-        return HANDLERS_LIST;
-    }
-
-    public static HandlerList getHandlerList() {
-        return HANDLERS_LIST;
-    }
-
     private ItemStack display;
-    private final int level;
 
     /**
      * Called when a BlobPet is displayed
@@ -32,21 +21,19 @@ public class BlobPetDisplayEvent extends BlobPetEvent {
      * @param display The display
      */
     public BlobPetDisplayEvent(@NotNull BlobPet pet,
-                               @NotNull ItemStack display,
-                               @NotNull int level) {
+                               @NotNull ItemStack display) {
         super(pet, false);
         Objects.requireNonNull(display, "'display' cannot be null!");
         this.display = display;
-        this.level = level;
     }
 
-    /**
-     * Gets the level of the pet
-     *
-     * @return the level of the pet
-     */
-    public int getLevel() {
-        return level;
+    public static HandlerList getHandlerList() {
+        return HANDLERS_LIST;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return HANDLERS_LIST;
     }
 
     /**

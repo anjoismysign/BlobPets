@@ -92,12 +92,14 @@ public record BlobPet(@NotNull PetData getPetData,
     /**
      * Will create a new instance of ItemDisplayFloatingPet
      *
-     * @param owner the owner of the pet
+     * @param owner      the owner of the pet
+     * @param packMaster the pack master related to the owner
+     * @param index      the inventory index
      * @return a new instance of ItemDisplayFloatingPet
      */
     public BlobFloatingPet asItemDisplay(@NotNull Player owner,
                                          @NotNull PackMaster<BlobFloatingPet> packMaster,
-                                         int storageIndex) {
+                                         int index) {
         Objects.requireNonNull(owner, "'owner' cannot be null");
         ItemStack itemStack = getPetData().getItemStack();
         Particle particle = getPetData().getParticle();
@@ -106,18 +108,20 @@ public record BlobPet(@NotNull PetData getPetData,
         if (itemStack == null || itemStack.getType().isAir())
             throw new IllegalStateException("ItemStack cannot be null nor be air");
         return new PackItemPet(owner, itemStack, particle, customName,
-                settings, getKey, packMaster, storageIndex);
+                settings, getKey, packMaster, index);
     }
 
     /**
      * Will create a new instance of BlockDisplayFloatingPet
      *
-     * @param owner the owner of the pet
+     * @param owner      the owner of the pet
+     * @param packMaster the pack master related to the owner
+     * @param index      the inventory index
      * @return a new instance of BlockDisplayFloatingPet
      */
     public BlobFloatingPet asBlockDisplay(@NotNull Player owner,
                                           @NotNull PackMaster<BlobFloatingPet> packMaster,
-                                          int storageIndex) {
+                                          int index) {
         Objects.requireNonNull(owner, "'owner' cannot be null");
         BlockData blockData = getPetData().getBlockData();
         Particle particle = getPetData().getParticle();
@@ -126,7 +130,7 @@ public record BlobPet(@NotNull PetData getPetData,
         if (blockData == null || blockData.getMaterial().isAir())
             throw new IllegalStateException("ItemStack cannot be null nor be air");
         return new PackBlockPet(owner, blockData, particle, customName,
-                settings, getKey, packMaster, storageIndex);
+                settings, getKey, packMaster, index);
     }
 
     /**

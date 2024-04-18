@@ -10,8 +10,12 @@ import me.anjoismysign.blobpets.entity.petexpansion.PetExpansionDirector;
 import me.anjoismysign.blobpets.entity.petowner.BlobPetOwner;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import us.mytheria.bloblib.api.BlobLibInventoryAPI;
 import us.mytheria.bloblib.entities.GenericManagerDirector;
 import us.mytheria.bloblib.entities.ObjectDirector;
+import us.mytheria.bloblib.entities.inventory.InventoryButton;
+import us.mytheria.bloblib.entities.inventory.InventoryDataRegistry;
 
 import java.util.Collections;
 
@@ -20,7 +24,9 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
 
     public PetsManagerDirector(BlobPets plugin) {
         super(plugin);
-        registerBlobInventory("View-Pets", "es_es/View-Pets");
+        registerBlobInventory("View-Pet-Storage", "es_es/View-Pet-Storage");
+        registerBlobInventory("View-Pet-Inventory", "es_es/View-Pet-Inventory");
+        registerBlobInventory("Manage-Pets", "es_es/Manage-Pets");
         addManager("ConfigManager", new PetsConfigManager(this));
         addManager("ListenerManager", new PetsListenerManager(this));
         addManager("BlobPetOwner", new BlobPetOwnerManager(this,
@@ -45,6 +51,26 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
             });
         });
         blobPetsCmd = BlobPetsCmd.of(this);
+        reloadInventories();
+    }
+
+    private void reloadInventories() {
+        InventoryDataRegistry<InventoryButton> registry = BlobLibInventoryAPI.getInstance()
+                .getInventoryDataRegistry("Manage-Pets");
+        registry.onClick("Storage", event -> {
+            Player player = (Player) event.getWhoClicked();
+            BlobPetOwner owner = BlobPetOwner.by(player);
+            if (owner == null)
+                return;
+            owner.openPetStorage();
+        });
+        registry.onClick("Inventory", event -> {
+            Player player = (Player) event.getWhoClicked();
+            BlobPetOwner owner = BlobPetOwner.by(player);
+            if (owner == null)
+                return;
+            owner.openPetInventory();
+        });
     }
 
     /**
@@ -52,6 +78,7 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
      */
     @Override
     public void reload() {
+        reloadInventories();
         getConfigManager().reload();
         getListenerManager().reload();
         getPetMeasurementsDirector().reload();

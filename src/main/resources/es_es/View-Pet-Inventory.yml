@@ -1,0 +1,33 @@
+Locale: es_es
+Title: '&lMIS MASCOTAS > INVENTARIO'
+Size: 18
+Buttons:
+  Background:
+    ItemStack:
+      Material: BLACK_STAINED_GLASS_PANE
+      DisplayName: ' '
+      Lore: [ ]
+    Slot: 9-17
+  Pets:
+    ItemStack:
+      Material: AIR
+    Slot: 0-8
+  Previous-Page:
+    ItemStack:
+      Material: ARROW
+      DisplayName: '&6Página anterior'
+      Lore:
+        - '&7Click para ir a la página anterior'
+    Slot: 16
+  Next-Page:
+    ItemStack:
+      Material: ARROW
+      DisplayName: '&6Página siguiente'
+      Lore:
+        - '&7Click para ir a la siguiente página'
+    Slot: 17
+  Return:
+    ItemStack:
+      Material: SPECTRAL_ARROW
+      DisplayName: '&6Regresar'
+    Slot: 9

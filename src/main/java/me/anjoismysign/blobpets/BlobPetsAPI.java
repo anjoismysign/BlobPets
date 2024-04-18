@@ -88,6 +88,10 @@ public class BlobPetsAPI {
         return director.getConfigManager().getPetPacking();
     }
 
+    public boolean useSimpleStorage() {
+        return director.getConfigManager().useSimpleStorage();
+    }
+
     /**
      * Whether to display levels
      *
