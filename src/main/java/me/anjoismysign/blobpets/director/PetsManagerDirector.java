@@ -3,6 +3,7 @@ package me.anjoismysign.blobpets.director;
 import me.anjoismysign.blobpets.BlobPets;
 import me.anjoismysign.blobpets.command.BlobPetsCmd;
 import me.anjoismysign.blobpets.director.manager.BlobPetOwnerManager;
+import me.anjoismysign.blobpets.director.manager.ExpansionManager;
 import me.anjoismysign.blobpets.director.manager.PetsConfigManager;
 import me.anjoismysign.blobpets.director.manager.PetsListenerManager;
 import me.anjoismysign.blobpets.entity.*;
@@ -11,16 +12,17 @@ import me.anjoismysign.blobpets.entity.petowner.BlobPetOwner;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import us.mytheria.bloblib.api.BlobLibInventoryAPI;
 import us.mytheria.bloblib.entities.GenericManagerDirector;
 import us.mytheria.bloblib.entities.ObjectDirector;
 import us.mytheria.bloblib.entities.inventory.InventoryButton;
 import us.mytheria.bloblib.entities.inventory.InventoryDataRegistry;
 
-import java.util.Collections;
-
-public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
+public class PetsManagerDirector extends GenericManagerDirector<BlobPets> implements Listener {
     private final BlobPetsCmd blobPetsCmd;
+    private boolean isReloading;
 
     public PetsManagerDirector(BlobPets plugin) {
         super(plugin);
@@ -32,6 +34,7 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
         addManager("BlobPetOwner", new BlobPetOwnerManager(this,
                 getConfigManager().tinyDebug()));
         addDirector("PetMeasurements", PetMeasurements::fromFile, false);
+        isReloading = true;
         getPetMeasurementsDirector().whenObjectManagerFilesLoad(a -> {
             addDirector("PetAnimations", PetAnimations::fromFile, false);
             getPetAnimationsDirector().whenObjectManagerFilesLoad(b -> {
@@ -40,12 +43,14 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
                     addDirector("BlobPet", file -> BlobPet
                             .fromFile(file, this), false);
                     getBlobPetDirector().whenObjectManagerFilesLoad(d -> {
-                        AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(Collections.unmodifiableCollection(d.values()));
-                        Bukkit.getPluginManager().callEvent(event);
                         addManager("AttributePetDirector",
                                 PetExpansionDirector.of(this,
                                         "AttributePet",
                                         AttributePet::fromFile));
+                        getAttributePetDirector().whenObjectManagerFilesLoad(e -> {
+                            addManager("ExpansionManager",
+                                    new ExpansionManager(this));
+                        });
                     });
                 });
             });
@@ -73,11 +78,21 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
         });
     }
 
+    @EventHandler
+    public void onLoad(AsyncBlobPetsLoadEvent event) {
+        Bukkit.getScheduler().runTask(getPlugin(), () -> {
+            getBlobPetOwnerManager().getAll()
+                    .forEach(BlobPetOwner::reloadHeldPets);
+            isReloading = false;
+        });
+    }
+
     /**
      * From top to bottom, follow the order.
      */
     @Override
     public void reload() {
+        isReloading = true;
         reloadInventories();
         getConfigManager().reload();
         getListenerManager().reload();
@@ -89,13 +104,9 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
                 getPetDataDirector().whenObjectManagerFilesLoad(c -> {
                     getBlobPetDirector().reload();
                     getBlobPetDirector().whenObjectManagerFilesLoad(d -> {
-                        Bukkit.getScheduler().runTask(getPlugin(), () -> {
-                            getBlobPetOwnerManager().getAll()
-                                    .forEach(BlobPetOwner::reloadHeldPets);
-                            Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-                                AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(Collections.unmodifiableCollection(d.values()));
-                                Bukkit.getPluginManager().callEvent(event);
-                            });
+                        getAttributePetDirector().reload();
+                        getAttributePetDirector().whenObjectManagerFilesLoad(e -> {
+                            getExpansionManager().reload();
                         });
                     });
                 });
@@ -129,6 +140,10 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
         return (PetExpansionDirector<AttributePet>) getManager("AttributePetDirector");
     }
 
+    public final ExpansionManager getExpansionManager() {
+        return getManager("ExpansionManager", ExpansionManager.class);
+    }
+
     public final PetsConfigManager getConfigManager() {
         return getManager("ConfigManager", PetsConfigManager.class);
     }
@@ -139,5 +154,9 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets> {
 
     public final BlobPetOwnerManager getBlobPetOwnerManager() {
         return getManager("BlobPetOwner", BlobPetOwnerManager.class);
+    }
+
+    public boolean isReloading() {
+        return isReloading;
     }
 }
