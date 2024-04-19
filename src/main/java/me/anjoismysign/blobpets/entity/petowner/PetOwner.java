@@ -56,67 +56,32 @@ public interface PetOwner extends PetInventoryHolder {
      * Will check if the pet owner is holding a pet by the hold index
      * The hold index is the order the pet was held in, not the index of #getPets.
      *
-     * @param holdIndex The index of the pet
+     * @param inventoryIndex The index of the pet
      * @return If the pet owner is holding the pet
      */
-    default boolean isHoldingPet(int holdIndex) {
-        return getHeldPets().containsKey(holdIndex);
+    default boolean isHoldingPet(int inventoryIndex) {
+        return getHeldPets().containsKey(inventoryIndex);
     }
 
     /**
      * Gets the pet the owner is holding by the hold index.
      * The hold index is the order the pet was held in, not the index of #getPets.
      *
-     * @param holdIndex The index of the pet
+     * @param inventoryIndex The index of the pet
      * @return The pet the owner is holding
      */
     @Nullable
-    default BlobFloatingPet getHeldPet(int holdIndex) {
-        return getHeldPets().get(holdIndex);
+    default BlobFloatingPet getHeldPet(int inventoryIndex) {
+        return getHeldPets().get(inventoryIndex);
     }
 
     /**
-     * Returns a held pet to storage by its storage index.
-     * The storage index is the index of the pet in #getPets
+     * Returns a pet to the pet storage by its inventory index
      *
-     * @param storageIndex The storageIndex of the pet
-     * @return If the pet was returned. False if no pet was held by that storage index.
-     */
-    boolean returnHeldPetByStorage(int storageIndex);
-
-    /**
-     * Returns a held pet to storage by its hold index.
-     * The hold index is the order the pet was held in, not the index of #getPets.
-     * Should not be used if BlobPetsAPI#useSimpleStorage is true.
-     *
-     * @param holdIndex The index of the pet
-     * @return If the pet was returned. False if no pet was held by that hold index.
-     */
-    boolean returnHeldPet(int holdIndex);
-
-    /**
-     * Returns a held pet to storage
-     *
-     * @param pet The pet to return
-     * @return If the pet was returned. False if pet is not held.
-     */
-    default boolean returnHeldPet(BlobFloatingPet pet) {
-        for (Map.Entry<Integer, BlobFloatingPet> entry : getHeldPets().entrySet()) {
-            if (!entry.getValue().equals(pet))
-                continue;
-            return returnHeldPetByStorage(entry.getKey());
-        }
-        return false;
-    }
-
-    /**
-     * Holds a pet by its storage index.
-     * The storage index is the index of the pet in #getPets
-     *
-     * @param storageIndex The index of the pet
+     * @param inventoryIndex The index of the pet in the pet inventory
      * @return If the operation was successful. False if denied.
      */
-    boolean holdPet(int storageIndex);
+    boolean returnPet(int inventoryIndex);
 
     /**
      * Will reload the held pets

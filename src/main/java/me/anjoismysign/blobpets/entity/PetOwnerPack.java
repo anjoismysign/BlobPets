@@ -57,27 +57,6 @@ public record PetOwnerPack(
         held.forEach(BlobFloatingPet::remove);
     }
 
-    public void reload() {
-        if (getHeldPets.isEmpty())
-            return;
-        List<BlobFloatingPet> held = getHeldPets.values().stream().toList();
-        held.forEach(BlobFloatingPet::remove);
-        Player player = getOwner.getPlayer();
-        if (player == null)
-            return;
-        getHeldPets.keySet().forEach(index -> {
-            BlobPet blobPet = getPet(index);
-            if (blobPet == null)
-                return;
-            BlobFloatingPet heldPet;
-            if (blobPet.isBlobBlockPet())
-                heldPet = blobPet.asBlockDisplay(player, getPackMaster, index);
-            else
-                heldPet = blobPet.asItemDisplay(player, getPackMaster, index);
-            getHeldPets.put(index, heldPet);
-        });
-    }
-
     public boolean isOwnerOnline() {
         return getOwner.getPlayer() != null && getOwner.getPlayer().isOnline();
     }
@@ -105,7 +84,10 @@ public record PetOwnerPack(
             return false;
         }
         BlobPet blobPet = getOwner.getBlobPet(key);
-        int index = getOwner.getInventory().size();
+        Map<Integer, String> inventory = getOwner.getInventory();
+        int index = inventory.keySet().stream()
+                .filter(i -> inventory.get(i) == null)
+                .findFirst().orElse(inventory.size());
         if (blobPet.isBlobBlockPet())
             blobPet.asBlockDisplay(player, getPackMaster, index);
         else

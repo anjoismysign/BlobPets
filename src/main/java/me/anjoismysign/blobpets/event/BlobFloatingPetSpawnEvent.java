@@ -13,12 +13,12 @@ public class BlobFloatingPetSpawnEvent extends BlobFloatingPetEvent {
     /**
      * Called after a BlobFloatingPet spawns
      *
-     * @param pet the BlobFloatingPet that spawned
+     * @param pet   the BlobFloatingPet that spawned
+     * @param index the index of the BlobFloatingPet in the inventory
      */
     public BlobFloatingPetSpawnEvent(@NotNull BlobFloatingPet pet,
-                                     int holdIndex,
-                                     int storageIndex) {
-        super(pet, holdIndex, storageIndex, false);
+                                     int index) {
+        super(pet, index, false);
     }
 
     public static HandlerList getHandlerList() {

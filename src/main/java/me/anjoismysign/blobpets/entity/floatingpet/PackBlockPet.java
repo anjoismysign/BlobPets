@@ -43,7 +43,7 @@ public class PackBlockPet extends BlockDisplayPackFloatingPet implements BlobFlo
                     if (!player.isValid() || !player.isOnline())
                         return;
                     BlobFloatingPetSpawnEvent event = new BlobFloatingPetSpawnEvent(this,
-                            packMaster.getIndex(getIndex()), getIndex());
+                            getIndex());
                     Bukkit.getPluginManager().callEvent(event);
                 }, BlobPetsAPI.getInstance().getApplyDelay());
     }
@@ -57,7 +57,7 @@ public class PackBlockPet extends BlockDisplayPackFloatingPet implements BlobFlo
             if (findOwner() == null)
                 return;
             BlobFloatingPetDestroyEvent event = new BlobFloatingPetDestroyEvent(this,
-                    packMaster.getIndex(getIndex()), getIndex());
+                    getIndex());
             Bukkit.getPluginManager().callEvent(event);
         }
         super.destroy();

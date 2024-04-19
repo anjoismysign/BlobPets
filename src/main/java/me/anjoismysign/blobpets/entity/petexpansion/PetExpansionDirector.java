@@ -63,7 +63,7 @@ public class PetExpansionDirector<T extends PetExpansion> extends ObjectDirector
     @EventHandler
     public void onSpawn(BlobFloatingPetSpawnEvent event) {
         BlobFloatingPet floatingPet = event.getFloatingPet();
-        int holdIndex = event.getHoldIndex();
+        int holdIndex = event.getIndex();
         String key = floatingPet.getKey();
         T pet = isLinked(key);
         if (pet == null)
@@ -75,7 +75,7 @@ public class PetExpansionDirector<T extends PetExpansion> extends ObjectDirector
     @EventHandler
     public void onDestroy(BlobFloatingPetDestroyEvent event) {
         BlobFloatingPet floatingPet = event.getFloatingPet();
-        int holdIndex = event.getHoldIndex();
+        int holdIndex = event.getIndex();
         String key = floatingPet.getKey();
         T pet = isLinked(key);
         if (pet == null)

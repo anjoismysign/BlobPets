@@ -13,14 +13,12 @@ public class BlobFloatingPetDestroyEvent extends BlobFloatingPetEvent {
     /**
      * Called before a BlobFloatingPet is destroyed
      *
-     * @param pet          the BlobFloatingPet that will be destroyed
-     * @param holdIndex    the index of the BlobFloatingPet in the pack
-     * @param storageIndex the index of the BlobFloatingPet in the player's storage
+     * @param pet   the BlobFloatingPet that will be destroyed
+     * @param index the index of the BlobFloatingPet in the inventory
      */
     public BlobFloatingPetDestroyEvent(@NotNull BlobFloatingPet pet,
-                                       int holdIndex,
-                                       int storageIndex) {
-        super(pet, holdIndex, storageIndex, false);
+                                       int index) {
+        super(pet, index, false);
     }
 
     public static HandlerList getHandlerList() {

@@ -1,13 +1,13 @@
 package me.anjoismysign.blobpets.entity.petowner;
 
-import com.google.common.collect.BiMap;
 import me.anjoismysign.blobpets.entity.BlobPet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 
 public interface PetStorage {
-    BiMap<String, Integer> getStorage();
+    Map<String, Integer> getStorage();
 
     /**
      * Gets the amount of a pet in the storage

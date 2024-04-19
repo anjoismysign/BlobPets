@@ -1,7 +1,5 @@
 package me.anjoismysign.blobpets.entity.petowner;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import me.anjoismysign.anjo.entities.Tuple2;
 import me.anjoismysign.blobpets.entity.BlobPet;
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +13,13 @@ public interface PetInventoryHolder extends PetStorage {
 
     @NotNull
     @SuppressWarnings("unchecked")
-    static Tuple2<Map<Integer, String>, BiMap<String, Integer>> deserializePets(Map<String, Object> pets) {
+    static Tuple2<Map<Integer, String>, Map<String, Integer>> deserializePets(Map<String, Object> pets) {
         Map<Integer, String> inventory = pets.containsKey("Inventory") ?
                 (Map<Integer, String>) pets.get("Inventory") :
                 new HashMap<>();
-        BiMap<String, Integer> storage = pets.containsKey("Storage") ?
-                (BiMap<String, Integer>) pets.get("Storage") :
-                HashBiMap.create();
+        Map<String, Integer> storage = pets.containsKey("Storage") ?
+                (Map<String, Integer>) pets.get("Storage") :
+                new HashMap<>();
         return new Tuple2<>(inventory, storage);
     }
 
@@ -57,7 +55,7 @@ public interface PetInventoryHolder extends PetStorage {
     default boolean equip(@NotNull String key,
                           int index) {
         Objects.requireNonNull(key, "'key' cannot be null");
-        if (getInventory().containsKey(index))
+        if (getInventory().get(index) != null)
             return false;
         getInventory().put(index, key);
         return true;
@@ -100,12 +98,12 @@ public interface PetInventoryHolder extends PetStorage {
     /**
      * Gets a pet from the pet inventory through its index
      *
-     * @param index The index of the pet in the inventory
+     * @param inventoryIndex The index of the pet in the inventory
      * @return The pet
      */
     @Nullable
-    default BlobPet getPet(int index) {
-        String key = getInventory().get(index);
+    default BlobPet getPet(int inventoryIndex) {
+        String key = getInventory().get(inventoryIndex);
         if (key == null)
             return null;
         return getBlobPet(key);
