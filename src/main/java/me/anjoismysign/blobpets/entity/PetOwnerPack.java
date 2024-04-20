@@ -83,7 +83,9 @@ public record PetOwnerPack(
             player.closeInventory();
             return false;
         }
-        BlobPet blobPet = getOwner.getBlobPet(key);
+        BlobPet blobPet = getOwner.findBlobPet(key);
+        if (blobPet == null)
+            return false;
         Map<Integer, String> inventory = getOwner.getInventory();
         int index = inventory.keySet().stream()
                 .filter(i -> inventory.get(i) == null)

@@ -98,7 +98,7 @@ public class ExpansionManager extends PetsManager {
             }
         }
         if (assets.isEmpty()) {
-            Bukkit.getLogger().warning("No assets found in expansion: " + expansion.getName());
+            getPlugin().getLogger().warning("No assets found in expansion: " + expansion.getName());
             return true;
         }
         List<File> petMeasurements = assets.get(AssetType.PET_MEASUREMENTS);

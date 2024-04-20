@@ -164,8 +164,10 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                     if (!player.isOnline() || !player.isValid())
                         return;
                     String key = entry.getKey();
-                    if (!holdPet(key))
+                    if (!holdPet(key)) {
+                        openPetStorage();
                         return;
+                    }
                     subtractPet(key, 1);
                     BlobLibMessageAPI.getInstance()
                             .getMessage("BlobPets.Pet-Spawned",
@@ -278,8 +280,12 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
             if (key == null)
                 return;
             BlobPet pet = findBlobPet(key);
-            if (pet == null)
-                throw new RuntimeException("BlobPet with key '" + key + "' no longer exists!");
+            if (pet == null) {
+                addPet(key, 1);
+                Bukkit.getPluginManager().getPlugin("BlobPets").getLogger()
+                        .severe("BlobPet with key '" + key + "' no longer exists!");
+                return;
+            }
             holdPet(pet.getKey(), true);
         });
     }
