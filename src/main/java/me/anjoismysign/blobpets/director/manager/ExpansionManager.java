@@ -4,15 +4,14 @@ import me.anjoismysign.blobpets.director.PetsManager;
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
 import me.anjoismysign.blobpets.entity.*;
 import me.anjoismysign.blobpets.entity.petexpansion.PetExpansionDirector;
+import me.anjoismysign.blobpets.event.AsyncBlobPetsExpansionLoadEvent;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import us.mytheria.bloblib.entities.ObjectManager;
 import us.mytheria.bloblib.utilities.HandyDirectory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class ExpansionManager extends PetsManager {
@@ -36,15 +35,21 @@ public class ExpansionManager extends PetsManager {
     }
 
     public void reload(boolean isFirstLoad) {
-        HandyDirectory handyDirectory = HandyDirectory.of(expansionDirectory);
-        for (File file : handyDirectory.listFiles("zip")) {
-            if (!loadExpansion(file))
-                getPlugin().getLogger().severe("Failed to load expansion: " + file.getName());
+        try {
+            HandyDirectory handyDirectory = HandyDirectory.of(expansionDirectory);
+            for (File file : handyDirectory.listFiles("zip")) {
+                if (!loadExpansion(file))
+                    getPlugin().getLogger().severe("Failed to load expansion: " + file.getName());
+            }
+            AsyncBlobPetsExpansionLoadEvent event = new AsyncBlobPetsExpansionLoadEvent(isFirstLoad);
+            Bukkit.getPluginManager().callEvent(event);
+            AsyncBlobPetsLoadEvent loadEvent = new AsyncBlobPetsLoadEvent(isFirstLoad,
+                    Collections.unmodifiableCollection(getManagerDirector()
+                            .getBlobPetDirector().getObjectManager().values()));
+            Bukkit.getPluginManager().callEvent(loadEvent);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
-        AsyncBlobPetsLoadEvent event = new AsyncBlobPetsLoadEvent(isFirstLoad,
-                Collections.unmodifiableCollection(getManagerDirector()
-                        .getBlobPetDirector().getObjectManager().values()));
-        Bukkit.getPluginManager().callEvent(event);
     }
 
     /**
@@ -102,69 +107,50 @@ public class ExpansionManager extends PetsManager {
             return true;
         }
         List<File> petMeasurements = assets.get(AssetType.PET_MEASUREMENTS);
-        if (petMeasurements != null) {
+        if (petMeasurements != null && !petMeasurements.isEmpty()) {
             ObjectManager<PetMeasurements> objectManager = director.getPetMeasurementsDirector().getObjectManager();
             petMeasurements.forEach(file -> {
                 objectManager.loadFile(file, e -> {
                 });
             });
-            try {
-                FileUtils.deleteDirectory(assetsDirectory.get(AssetType.PET_MEASUREMENTS));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            HandyDirectory.of(assetsDirectory.get(AssetType.PET_MEASUREMENTS))
+                    .deleteRecursively();
         }
         List<File> petAnimations = assets.get(AssetType.PET_ANIMATIONS);
-        if (petAnimations != null) {
+        if (petAnimations != null && !petAnimations.isEmpty()) {
             ObjectManager<PetAnimations> objectManager = director.getPetAnimationsDirector().getObjectManager();
             petAnimations.forEach(file -> {
                 objectManager.loadFile(file, e -> {
                 });
             });
-            try {
-                FileUtils.deleteDirectory(assetsDirectory.get(AssetType.PET_ANIMATIONS));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            HandyDirectory.of(assetsDirectory.get(AssetType.PET_ANIMATIONS))
+                    .deleteRecursively();
         }
         List<File> petData = assets.get(AssetType.PET_DATA);
-        if (petData != null) {
+        if (petData != null && !petData.isEmpty()) {
             ObjectManager<PetData> objectManager = director.getPetDataDirector().getObjectManager();
             petData.forEach(file -> {
                 objectManager.loadFile(file, e -> {
                 });
             });
-            try {
-                FileUtils.deleteDirectory(assetsDirectory.get(AssetType.PET_DATA));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            HandyDirectory.of(assetsDirectory.get(AssetType.PET_DATA))
+                    .deleteRecursively();
         }
         List<File> blobPet = assets.get(AssetType.BLOB_PET);
-        if (blobPet != null) {
+        if (blobPet != null && !blobPet.isEmpty()) {
             ObjectManager<BlobPet> objectManager = director.getBlobPetDirector().getObjectManager();
             blobPet.forEach(file -> {
                 objectManager.loadFile(file, e -> {
                 });
             });
-            try {
-                FileUtils.deleteDirectory(assetsDirectory.get(AssetType.BLOB_PET));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            HandyDirectory.of(assetsDirectory.get(AssetType.BLOB_PET))
+                    .deleteRecursively();
         }
         List<File> attributePet = assets.get(AssetType.ATTRIBUTE_PET);
-        if (attributePet != null) {
+        if (attributePet != null && !attributePet.isEmpty()) {
             PetExpansionDirector<AttributePet> attributePetDirector = director.getAttributePetDirector();
-            attributePet.forEach(file -> {
-                attributePetDirector.getObjectManager().loadFile(file, e -> {
-                });
-            });
-            try {
-                FileUtils.deleteDirectory(assetsDirectory.get(AssetType.ATTRIBUTE_PET));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            attributePet.forEach(attributePetDirector::addExpansion);
+            attributePetDirector.setExpansionDirectory(assetsDirectory.get(AssetType.ATTRIBUTE_PET));
         }
         return true;
     }

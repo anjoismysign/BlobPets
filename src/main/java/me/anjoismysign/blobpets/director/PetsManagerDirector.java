@@ -54,22 +54,30 @@ public class PetsManagerDirector extends GenericManagerDirector<BlobPets>
         if (tinyDebug)
             logger.warning("Loading PetData");
         addDirector("PetData", PetData::fromFile, false);
-        if (tinyDebug)
-            logger.warning("Loading BlobPet");
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (independentAreReloading())
                     return;
                 cancel();
+                if (tinyDebug)
+                    logger.warning("Loading BlobPet");
                 addDirector("BlobPet", file -> BlobPet
                         .fromFile(file, PetsManagerDirector.this), false);
                 getBlobPetDirector().whenObjectManagerFilesLoad(blobPetObjectManager -> {
+                    if (tinyDebug)
+                        logger.warning("BlobPet loaded");
+                    if (tinyDebug)
+                        logger.warning("Loading AttributePet");
                     addManager("AttributePetDirector",
                             PetExpansionDirector.of(PetsManagerDirector.this,
                                     "AttributePet",
                                     AttributePet::fromFile));
                     getAttributePetDirector().whenObjectManagerFilesLoad(e -> {
+                        if (tinyDebug)
+                            logger.warning("AttributePet loaded");
+                        if (tinyDebug)
+                            logger.warning("Loading ExpansionManager");
                         addManager("ExpansionManager",
                                 new ExpansionManager(PetsManagerDirector.this));
                     });
