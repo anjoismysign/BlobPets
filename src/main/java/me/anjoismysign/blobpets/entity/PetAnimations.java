@@ -1,6 +1,5 @@
 package me.anjoismysign.blobpets.entity;
 
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import us.mytheria.bloblib.displayentity.EntityAnimationsCarrier;
@@ -44,7 +43,7 @@ public record PetAnimations(double getFollowSpeed,
 
     public static PetAnimations fromFile(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        String key = FilenameUtils.removeExtension(file.getName());
+        String key = file.getName().replace(".yml", "");
         EntityAnimationsCarrier animationsCarrier = EntityAnimationsCarrier.READ_OR_FAIL_FAST(config);
         return of(animationsCarrier, key);
     }

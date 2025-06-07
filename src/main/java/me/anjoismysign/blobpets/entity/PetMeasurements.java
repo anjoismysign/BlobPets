@@ -1,6 +1,5 @@
 package me.anjoismysign.blobpets.entity;
 
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import us.mytheria.bloblib.displayentity.DisplayMeasurements;
@@ -33,7 +32,7 @@ public record PetMeasurements(float getScaleX,
 
     public static PetMeasurements fromFile(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        String key = FilenameUtils.removeExtension(file.getName());
+        String key = file.getName().replace(".yml", "");
         DisplayMeasurements displayMeasurements = DisplayMeasurements.READ_OR_FAIL_FAST(config);
         return of(displayMeasurements, key);
     }

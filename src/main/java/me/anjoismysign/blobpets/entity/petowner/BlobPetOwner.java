@@ -145,7 +145,9 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                     Bukkit.getPluginManager().callEvent(event);
                     return event.getDisplay();
                 },
-                owner -> managePets());
+                owner -> managePets(),
+                null,
+                null);
     }
 
     @Override
@@ -197,7 +199,9 @@ public record BlobPetOwner(@NotNull BlobCrudable blobCrudable,
                     Bukkit.getPluginManager().callEvent(event);
                     return event.getDisplay();
                 },
-                owner -> managePets());
+                owner -> managePets(),
+                null,
+                null);
     }
 
     public @Nullable Player getPlayer() {

@@ -5,7 +5,6 @@ import me.anjoismysign.blobpets.director.PetsManagerDirector;
 import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
 import me.anjoismysign.blobpets.entity.floatingpet.PackBlockPet;
 import me.anjoismysign.blobpets.entity.floatingpet.PackItemPet;
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -39,7 +38,7 @@ public record BlobPet(@NotNull PetData getPetData,
 
     public static BlobPet fromFile(File file, PetsManagerDirector director) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        String key = FilenameUtils.removeExtension(file.getName());
+        String key = file.getName().replace(".yml", "");
         if (!config.isString("PetData"))
             throw new ConfigurationFieldException("'PetData' is not valid or set");
         if (!config.isString("PetAnimations"))
@@ -74,7 +73,7 @@ public record BlobPet(@NotNull PetData getPetData,
         yamlConfiguration.set("PetData", getPetData);
         yamlConfiguration.set("PetAnimation", getPetAnimations);
         yamlConfiguration.set("PetMeasurements", getPetMeasurements);
-        yamlConfiguration.set("TranslatableItem", getDisplay.getReference());
+        yamlConfiguration.set("TranslatableItem", getDisplay.identifier());
         try {
             yamlConfiguration.save(file);
         } catch (Exception e) {

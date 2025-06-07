@@ -1,6 +1,5 @@
 package me.anjoismysign.blobpets.entity;
 
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -41,7 +40,7 @@ public record PetData(@Nullable ItemStack getItemStack,
 
     public static PetData fromFile(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        String key = FilenameUtils.removeExtension(file.getName());
+        String key = file.getName().replace(".yml", "");
         DisplayPetRecord petRecord = DisplayPetRecord.read(config);
         if (petRecord.itemStack() == null && petRecord.blockData() == null)
             throw new NullPointerException("PetData must have either an ItemStack or a BlockData");

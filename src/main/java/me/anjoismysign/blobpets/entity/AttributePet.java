@@ -3,7 +3,6 @@ package me.anjoismysign.blobpets.entity;
 import me.anjoismysign.blobpets.BlobPetsAPI;
 import me.anjoismysign.blobpets.entity.floatingpet.BlobFloatingPet;
 import me.anjoismysign.blobpets.entity.petexpansion.PetExpansion;
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -23,7 +22,7 @@ public record AttributePet(@NotNull Map<Attribute, List<AttributeModifier>> getA
 
     public static AttributePet fromFile(File file) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        String key = FilenameUtils.removeExtension(file.getName());
+        String key = file.getName().replace(".yml", "");
         if (!config.isString("BlobPet"))
             throw new ConfigurationFieldException("'BlobPet' is not valid or set");
         String blobPetKey = config.getString("BlobPet");
