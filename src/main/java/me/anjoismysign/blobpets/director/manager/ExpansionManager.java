@@ -2,7 +2,12 @@ package me.anjoismysign.blobpets.director.manager;
 
 import me.anjoismysign.blobpets.director.PetsManager;
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
-import me.anjoismysign.blobpets.entity.*;
+import me.anjoismysign.blobpets.entity.AssetType;
+import me.anjoismysign.blobpets.entity.AttributePet;
+import me.anjoismysign.blobpets.entity.BlobPet;
+import me.anjoismysign.blobpets.entity.PetAnimations;
+import me.anjoismysign.blobpets.entity.PetData;
+import me.anjoismysign.blobpets.entity.PetMeasurements;
 import me.anjoismysign.blobpets.entity.petexpansion.PetExpansionDirector;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsExpansionLoadEvent;
 import me.anjoismysign.blobpets.event.AsyncBlobPetsLoadEvent;

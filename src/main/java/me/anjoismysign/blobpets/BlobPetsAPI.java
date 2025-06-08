@@ -1,7 +1,11 @@
 package me.anjoismysign.blobpets;
 
 import me.anjoismysign.blobpets.director.PetsManagerDirector;
-import me.anjoismysign.blobpets.entity.*;
+import me.anjoismysign.blobpets.entity.AttributePet;
+import me.anjoismysign.blobpets.entity.BlobPet;
+import me.anjoismysign.blobpets.entity.PetAnimations;
+import me.anjoismysign.blobpets.entity.PetData;
+import me.anjoismysign.blobpets.entity.PetMeasurements;
 import me.anjoismysign.blobpets.entity.petowner.PetOwner;
 import me.anjoismysign.blobpets.settings.PetPacking;
 import org.bukkit.entity.Player;
